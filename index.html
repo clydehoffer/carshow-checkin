@@ -599,11 +599,14 @@ let checkedInPlates = JSON.parse(localStorage.getItem("checkedInPlates") || "[]"
 window.addEventListener("DOMContentLoaded", () => {
   const params = new URLSearchParams(window.location.search);
 
+  const first = params.get("first") || "";
+  const last  = params.get("last")  || "";
   driver = {
-    name:  params.get("name")  || "",
+    name:  [first, last].filter(Boolean).join(" "),
     plate: params.get("plate") || "",
     make:  params.get("make")  || "",
     model: params.get("model") || "",
+    year:  params.get("year")  || "",
     org:   params.get("org")   || "",
     email: params.get("email") || "",
   };
@@ -656,7 +659,7 @@ window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("info-plate").textContent   = driver.plate || "—";
   document.getElementById("info-email").textContent   = driver.email || "—";
   document.getElementById("info-vehicle").textContent =
-    [driver.make, driver.model].filter(Boolean).join("  ") || "—";
+    [driver.year, driver.make, driver.model].filter(Boolean).join("  ") || "—";
 
   if (driver.org) {
     document.getElementById("info-org").textContent = driver.org;
@@ -771,7 +774,7 @@ function submitCheckin() {
 }
 
 function showSuccess() {
-  const vehicle = [driver.make, driver.model].filter(Boolean).join(" ");
+  const vehicle = [driver.year, driver.make, driver.model].filter(Boolean).join(" ");
   document.getElementById("success-name").textContent  = driver.name  || "Driver";
   document.getElementById("success-plate").textContent = driver.plate || "";
   document.getElementById("success-detail").innerHTML  =
