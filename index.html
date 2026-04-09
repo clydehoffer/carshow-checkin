@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Cal State LA Car Show</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --gold: #FFCE00;
+  --black: #0a0a0a;
+  --white: #ffffff;
+  --gray: #f5f5f5;
+  --gray2: #ebebeb;
+  --border: #e0e0e0;
+  --text: #1a1a1a;
+  --text2: #666;
+  --text3: #999;
+  --green: #1db954;
+  --red: #ff3b30;
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+html, body {
+  min-height: 100vh;
+  background: var(--black);
+  font-family: -apple-system, 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 24px 16px 48px;
+}
+.card {
+  background: var(--white);
+  border-radius: 24px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+}
+.card-header {
+  background: var(--black);
+  padding: 22px 24px 18px;
+  border-bottom: 3px solid var(--gold);
+  border-radius: 24px 24px 0 0;
+}
+.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.header-logo { font-size: 11px; font-weight: 600; color: var(--gold); letter-spacing: 0.12em; text-transform: uppercase; }
+.header-badge { background: rgba(255,206,0,0.15); border: 1px solid rgba(255,206,0,0.3); color: var(--gold); font-size: 10px; font-weight: 600; letter-spacing: 0.08em; padding: 3px 8px; border-radius: 100px; text-transform: uppercase; }
+.header-title { font-size: 20px; font-weight: 700; color: var(--white); line-height: 1.2; }
+.header-meta { font-size: 12px; color: #555; margin-top: 2px; }
+.screen { display: none; }
+.screen.active { display: block; }
+.body-pad { padding: 22px 24px; }
+.section-label { font-size: 10px; font-weight: 600; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; }
+.driver-card { background: var(--gray); border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 18px; }
+.field-label { font-size: 10px; font-weight: 600; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 2px; }
+.field-value { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 10px; }
+.field-value:last-child { margin-bottom: 0; }
+.plate-badge { display: inline-block; background: var(--black); color: var(--gold); font-size: 15px; font-weight: 700; letter-spacing: 0.08em; padding: 5px 12px; border-radius: 7px; font-family: monospace; }
+.btn {
+  width: 100%;
+  border-radius: var(--radius-sm);
+  padding: 15px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  border: none;
+  margin-bottom: 10px;
+  transition: opacity 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { opacity: 0.8; }
+.btn-gold { background: var(--gold); color: var(--black); }
+.btn-black { background: var(--black); color: var(--white); }
+.btn-outline { background: transparent; color: var(--text2); border: 1px solid var(--border); font-weight: 500; }
+.hint { font-size: 12px; color: var(--text3); text-align: center; line-height: 1.4; }
+.divider { height: 1px; background: var(--border); margin: 18px 0; }
+.centered { padding: 40px 24px; text-align: center; }
+.icon-wrap { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+.icon-wrap.gray { background: var(--gray); }
+.icon-wrap.green { background: rgba(29,185,84,0.12); }
+.icon-wrap svg { width: 26px; height: 26px; }
+.screen-title { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.screen-sub { font-size: 14px; color: var(--text2); line-height: 1.5; margin-bottom: 20px; }
+.pin-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.pin-sub { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
+.pin-dots { display: flex; gap: 12px; justify-content: center; margin-bottom: 6px; }
+.pin-dot { width: 13px; height: 13px; border-radius: 50%; background: var(--border); transition: background 0.15s; }
+.pin-dot.filled { background: var(--black); }
+.pin-dot.error { background: var(--red); }
+.pin-error { text-align: center; font-size: 12px; color: var(--red); font-weight: 500; min-height: 18px; margin-bottom: 14px; }
+.pin-keypad { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.pin-key { background: var(--gray); border: none; border-radius: var(--radius-sm); padding: 17px 0; font-size: 20px; color: var(--text); cursor: pointer; font-family: inherit; -webkit-tap-highlight-color: transparent; }
+.pin-key:active { background: var(--gray2); }
+.pin-key.empty { background: transparent; cursor: default; }
+.pin-key.del { font-size: 15px; color: var(--text2); }
+.success-icon { width: 68px; height: 68px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; animation: pop 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+.success-icon svg { width: 34px; height: 34px; }
+.success-plate { display: inline-block; background: var(--black); color: var(--gold); font-size: 16px; font-weight: 700; letter-spacing: 0.1em; padding: 6px 16px; border-radius: 8px; font-family: monospace; margin: 10px 0 16px; }
+@keyframes pop { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+@keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
+.shake { animation: shake 0.4s ease; }
+.spinner { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--black); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 14px; }
+@keyframes spin { to{transform:rotate(360deg)} }
+.vote-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.vote-sub { font-size: 13px; color: var(--text2); margin-bottom: 16px; line-height: 1.4; }
+.voted-item { display: flex; align-items: center; gap: 8px; padding: 9px 12px; background: rgba(29,185,84,0.08); border-radius: 8px; margin-bottom: 6px; font-size: 13px; font-weight: 500; color: var(--text); }
+.voted-item svg { width: 14px; height: 14px; color: var(--green); flex-shrink: 0; }
+.banner { background: rgba(29,185,84,0.08); border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 16px; }
+.banner-title { font-size: 13px; font-weight: 700; color: var(--green); display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+.banner-title svg { width: 13px; height: 13px; }
+.banner-sub { font-size: 12px; color: var(--text2); }
+
+/* ── The select lives at body level, invisible ── */
+#ghost-select {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  opacity: 0;
+  font-size: 16px;
+  z-index: -1;
+  pointer-events: none;
+}
+</style>
+</head>
+<body>
+
+<!-- Ghost select at body root — no stacking context issues -->
+<select id="ghost-select" onchange="onCategoryPicked(this)">
+  <option value="">Select a category...</option>
+  <option value="best-in-show">Best in Show</option>
+  <option value="eagles-choice">Eagle's Choice</option>
+  <option value="best-paint">Best Paint</option>
+  <option value="best-motorcycle">Best Motorcycle</option>
+  <option value="best-student">Best Student Car</option>
+</select>
+
+<div class="card">
+  <div class="card-header">
+    <div class="header-top">
+      <div class="header-logo">Cal State LA</div>
+      <div class="header-badge">Car Show 2025</div>
+    </div>
+    <div class="header-title">Car Show 2025</div>
+    <div class="header-meta">April 25 · Lot 5 · 10:00 AM – 5:00 PM</div>
+  </div>
+
+  <!-- Closed -->
+  <div class="screen" id="screen-closed">
+    <div class="centered">
+      <div class="icon-wrap gray">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <div class="screen-title" id="closed-title">Not open yet</div>
+      <div class="screen-sub" id="closed-sub">Check-in opens April 25 at 10:00 AM.</div>
+    </div>
+  </div>
+
+  <!-- Driver info (not checked in) -->
+  <div class="screen" id="screen-driver">
+    <div class="body-pad">
+      <div class="section-label">Driver Information</div>
+      <div class="driver-card">
+        <div class="field-label">Name</div>
+        <div class="field-value" id="d-name"></div>
+        <div class="field-label">Vehicle</div>
+        <div class="field-value" id="d-vehicle"></div>
+        <div class="field-label">License Plate</div>
+        <div class="field-value"><span class="plate-badge" id="d-plate"></span></div>
+        <div id="d-org-wrap">
+          <div class="field-label">Car Club / Org</div>
+          <div class="field-value" id="d-org"></div>
+        </div>
+        <div class="field-label">Email</div>
+        <div class="field-value" id="d-email"></div>
+      </div>
+      <button class="btn btn-gold" onclick="goPin()">Volunteer Check-In →</button>
+      <div class="hint">Attendees: voting available after check-in.</div>
+    </div>
+  </div>
+
+  <!-- PIN -->
+  <div class="screen" id="screen-pin">
+    <div class="body-pad">
+      <div class="pin-title">Volunteer PIN</div>
+      <div class="pin-sub">Enter the 4-digit PIN to check in this driver.</div>
+      <div class="pin-dots" id="pin-dots">
+        <div class="pin-dot" id="d0"></div>
+        <div class="pin-dot" id="d1"></div>
+        <div class="pin-dot" id="d2"></div>
+        <div class="pin-dot" id="d3"></div>
+      </div>
+      <div class="pin-error" id="pin-err"></div>
+      <div class="pin-keypad">
+        <button class="pin-key" onclick="pk('1')">1</button>
+        <button class="pin-key" onclick="pk('2')">2</button>
+        <button class="pin-key" onclick="pk('3')">3</button>
+        <button class="pin-key" onclick="pk('4')">4</button>
+        <button class="pin-key" onclick="pk('5')">5</button>
+        <button class="pin-key" onclick="pk('6')">6</button>
+        <button class="pin-key" onclick="pk('7')">7</button>
+        <button class="pin-key" onclick="pk('8')">8</button>
+        <button class="pin-key" onclick="pk('9')">9</button>
+        <button class="pin-key empty"></button>
+        <button class="pin-key" onclick="pk('0')">0</button>
+        <button class="pin-key del" onclick="pdel()">&#x232B;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Submitting -->
+  <div class="screen" id="screen-submitting">
+    <div class="centered">
+      <div class="spinner"></div>
+      <div style="font-size:15px;font-weight:500;color:var(--text)">Checking in driver...</div>
+    </div>
+  </div>
+
+  <!-- Check-in success -->
+  <div class="screen" id="screen-ci-success">
+    <div class="centered">
+      <div class="success-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="screen-title">Checked In!</div>
+      <div class="screen-sub">Driver is now live on the vote board.</div>
+      <div class="success-plate" id="ci-plate"></div>
+      <div style="font-size:13px;color:var(--text2);font-weight:500" id="ci-name"></div>
+    </div>
+  </div>
+
+  <!-- Vote screen -->
+  <div class="screen" id="screen-vote">
+    <div class="body-pad">
+      <div class="section-label">Checked In</div>
+      <div class="driver-card">
+        <div class="field-label">Name</div>
+        <div class="field-value" id="v-name"></div>
+        <div class="field-label">Vehicle</div>
+        <div class="field-value" id="v-vehicle"></div>
+        <div class="field-label">License Plate</div>
+        <div class="field-value"><span class="plate-badge" id="v-plate"></span></div>
+      </div>
+      <div id="vote-area"></div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div class="screen" id="screen-error">
+    <div class="centered">
+      <div class="screen-title">Something went wrong</div>
+      <div class="screen-sub" id="err-sub">Please try again.</div>
+      <button class="btn btn-black" onclick="show('screen-driver')">Go Back</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PIN          = "5151";
+const TESTING      = true;
+const CI_FORM      = "https://docs.google.com/forms/d/e/1FAIpQLSfsXzJkWG3GLe_D_Xo-9NBEmeHTfeLga-F16rOriCDaNcdfsQ/formResponse";
+const CHECKIN_API  = "https://script.google.com/macros/s/AKfycbwA3CW8pUTQety_3aGa1wfsMLNUjRCun4zKDuRf8ANxWMhvRTcjLWebk1A-4B8OcknRRQ/exec";
+const VOTES_API    = "https://script.google.com/macros/s/AKfycbz9wEBx1OdVPCH_TCa4Tu-4rPXFpXLSXl0NpLM-4UTTCuzYyJc2jJqmlzy8V0To1BQMxw/exec";
+const VOTE_FORM    = "https://docs.google.com/forms/d/e/1FAIpQLScCJ1GNmSBalsLmqU-ohr6L1IaAtmtKXbsNCluR3qHfQS0OhQ/formResponse";
+const E_CI  = { first:"entry.899096314", last:"entry.1158440844", email:"entry.2067804406", org:"entry.712451967", make:"entry.1848103390", model:"entry.984314671", plate:"entry.594175136" };
+const E_V   = { cat:"entry.2095184271", car:"entry.1446723408", name:"entry.1632049593" };
+const CATS  = [
+  {id:"best-in-show",    name:"Best in Show"},
+  {id:"eagles-choice",   name:"Eagle's Choice"},
+  {id:"best-paint",      name:"Best Paint"},
+  {id:"best-motorcycle", name:"Best Motorcycle"},
+  {id:"best-student",    name:"Best Student Car"},
+];
+const CHECK_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+
+let driver = {};
+let pin    = "";
+let ciPlates = JSON.parse(localStorage.getItem("ci_v2")   || "[]");
+let votedPlates = JSON.parse(localStorage.getItem("voted_plates") || "[]");
+
+// Generate or retrieve persistent device ID
+function getDeviceId() {
+  let id = localStorage.getItem("device_id");
+  if (!id) {
+    id = "d_" + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+    localStorage.setItem("device_id", id);
+  }
+  return id;
+}
+const DEVICE_ID = getDeviceId();
+let pendingCatId = "";
+
+function show(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+window.addEventListener("DOMContentLoaded", async () => {
+  const p = new URLSearchParams(window.location.search);
+  driver = {
+    name:    [p.get("first")||"", p.get("last")||""].filter(Boolean).join(" "),
+    plate:   p.get("plate") || "",
+    make:    p.get("make")  || "",
+    model:   p.get("model") || "",
+    year:    p.get("year")  || "",
+    org:     p.get("org")   || "",
+    email:   p.get("email") || "",
+  };
+
+  if (!TESTING) {
+    const now   = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const event = new Date(2025, 3, 25);
+    const hr    = now.getHours();
+    if (today < event) return showClosed("Check-in not open yet", "Opens April 25 at 10:00 AM at Lot 5.");
+    if (today > event) return showClosed("Event has ended", "Thanks for participating!");
+    if (hr < 10)       return showClosed("Check-in not open yet", "Opens today at 10:00 AM.");
+    if (hr >= 17)      return showClosed("Check-in closed", "Check-in closed at 5:00 PM.");
+  }
+
+  const checkedIn = ciPlates.includes(driver.plate.toUpperCase()) || await checkSheet();
+  checkedIn ? showVote() : showDriverScreen();
+});
+
+function showClosed(t, s) {
+  document.getElementById("closed-title").textContent = t;
+  document.getElementById("closed-sub").textContent   = s;
+  show("screen-closed");
+}
+
+function showDriverScreen() {
+  const v = driver.year ? driver.year.replace(".0","") + " " : "";
+  document.getElementById("d-name").textContent    = driver.name    || "—";
+  document.getElementById("d-plate").textContent   = driver.plate   || "—";
+  document.getElementById("d-vehicle").textContent = (v + driver.make + " " + driver.model).trim() || "—";
+  document.getElementById("d-email").textContent   = driver.email   || "—";
+  if (driver.org) { document.getElementById("d-org").textContent = driver.org; }
+  else            { document.getElementById("d-org-wrap").style.display = "none"; }
+  show("screen-driver");
+}
+
+async function checkSheet() {
+  try {
+    const res  = await fetch(CHECKIN_API + "?t=" + Date.now());
+    const data = await res.json();
+    return (data.plates || []).includes(driver.plate.toUpperCase());
+  } catch(e) { return false; }
+}
+
+// ── PIN ──
+function goPin() { show("screen-pin"); }
+function pk(d) {
+  if (pin.length >= 4) return;
+  pin += d; dots();
+  if (pin.length === 4) setTimeout(checkPin, 150);
+}
+function pdel() { pin = pin.slice(0,-1); document.getElementById("pin-err").textContent=""; dots(); }
+function dots(mode) {
+  for (let i=0;i<4;i++) {
+    const el = document.getElementById("d"+i);
+    el.classList.remove("filled","error");
+    if (mode==="error") el.classList.add("error");
+    else if (i<pin.length) el.classList.add("filled");
+  }
+}
+function checkPin() {
+  if (pin === PIN) { submitCI(); }
+  else {
+    pin = "";
+    dots("error");
+    document.getElementById("pin-err").textContent = "Incorrect PIN. Try again.";
+    document.getElementById("pin-dots").classList.add("shake");
+    setTimeout(() => { document.getElementById("pin-dots").classList.remove("shake"); dots(); }, 500);
+  }
+}
+
+// ── Check-in submit ──
+function submitCI() {
+  show("screen-submitting");
+  const parts = driver.name.split(" ");
+  postForm(CI_FORM, {
+    [E_CI.first]:  parts[0]||"",
+    [E_CI.last]:   parts.slice(1).join(" ")||"",
+    [E_CI.email]:  driver.email,
+    [E_CI.org]:    driver.org,
+    [E_CI.make]:   driver.make,
+    [E_CI.model]:  driver.model,
+    [E_CI.plate]:  driver.plate,
+  }, "ci-frame");
+  ciPlates.push(driver.plate.toUpperCase());
+  localStorage.setItem("ci_v2", JSON.stringify(ciPlates));
+  setTimeout(() => {
+    document.getElementById("ci-plate").textContent = driver.plate;
+    document.getElementById("ci-name").textContent  = driver.name;
+    show("screen-ci-success");
+  }, 1800);
+}
+
+// ── Vote screen ──
+function showVote() {
+  const v = driver.year ? driver.year.replace(".0","") + " " : "";
+  document.getElementById("v-name").textContent    = driver.name    || "—";
+  document.getElementById("v-plate").textContent   = driver.plate   || "—";
+  document.getElementById("v-vehicle").textContent = (v + driver.make + " " + driver.model).trim() || "—";
+  renderVoteArea();
+  show("screen-vote");
+}
+
+function renderVoteArea() {
+  const alreadyVoted = votedPlates.includes(driver.plate.toUpperCase());
+
+  if (alreadyVoted) {
+    document.getElementById("vote-area").innerHTML = `
+      <div class="banner">
+        <div class="banner-title">${CHECK_SVG} Already voted!</div>
+        <div class="banner-sub">You've already cast your vote for this car.</div>
+      </div>
+      <div class="hint" style="margin-top:8px">One vote per car per device.</div>
+    `;
+    return;
+  }
+
+  document.getElementById("vote-area").innerHTML = `
+    <div class="vote-title">Vote for this car</div>
+    <div class="vote-sub">Select a category and cast your vote for <strong>${driver.name||"this driver"}</strong>.</div>
+    <button class="btn btn-outline" id="cat-btn" onclick="openPicker()" style="text-align:left;font-size:14px;color:var(--text3)">
+      Select a category...
+    </button>
+    <button class="btn btn-black" onclick="castVote()">Submit Vote</button>
+    <div class="hint">One vote per car per device.</div>
+  `;
+}
+
+function openPicker() {
+  const sel = document.getElementById("ghost-select");
+  sel.style.zIndex   = "9999";
+  sel.style.pointerEvents = "auto";
+  sel.focus();
+  sel.click();
+}
+
+function onCategoryPicked(sel) {
+  const btn = document.getElementById("cat-btn");
+  if (sel.value && btn) {
+    pendingCatId   = sel.value;
+    btn.textContent = sel.options[sel.selectedIndex].text;
+    btn.style.color = "var(--text)";
+    btn.style.borderColor = "var(--black)";
+  }
+  sel.style.zIndex        = "-1";
+  sel.style.pointerEvents = "none";
+}
+
+function castVote() {
+  if (!pendingCatId) {
+    const btn = document.getElementById("cat-btn");
+    if (btn) { btn.style.borderColor="var(--red)"; setTimeout(()=>btn.style.borderColor="",1200); }
+    return;
+  }
+  const catName = CATS.find(c=>c.id===pendingCatId)?.name || pendingCatId;
+  votedPlates.push(driver.plate.toUpperCase());
+  localStorage.setItem("voted_plates", JSON.stringify(votedPlates));
+
+  postForm(VOTE_FORM, {
+    [E_V.cat]:  pendingCatId,
+    [E_V.car]:  driver.plate,
+    [E_V.name]: driver.name,
+  }, "vote-frame");
+
+  pendingCatId = "";
+  const ghost = document.getElementById("ghost-select");
+  if (ghost) ghost.value = "";
+  showVoteBanner(catName);
+}
+
+function showVoteBanner(catName) {
+  document.getElementById("vote-area").innerHTML = `
+    <div class="banner">
+      <div class="banner-title">${CHECK_SVG} Vote submitted!</div>
+      <div class="banner-sub">You voted for <strong>${driver.name}</strong> in <strong>${catName}</strong>.</div>
+    </div>
+    <div class="hint" style="margin-top:12px">One vote per car per device. Thank you!</div>
+  `;
+}
+
+function postForm(url, fields, frameName) {
+  const body = Object.entries(fields)
+    .map(([k,v]) => encodeURIComponent(k) + "=" + encodeURIComponent(v||""))
+    .join("&");
+  fetch(url, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: body
+  }).catch(e => console.warn("Form post failed:", e));
+}
+</script>
+</body>
+</html>
