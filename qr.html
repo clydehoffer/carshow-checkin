@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Check-In QR Code — Cal State LA Car Show 2026</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #f0f0f0;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+}
+.card {
+  background: #ffffff;
+  border-radius: 24px;
+  border: 1px solid #d9d9dd;
+  max-width: 480px;
+  width: 100%;
+  overflow: hidden;
+}
+.gold-stripe {
+  background: #F5A800;
+  height: 8px;
+}
+.header {
+  padding: 20px 24px;
+  border-bottom: 3px solid #F5A800;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.header-badge {
+  background: #F5A800;
+  color: #000000;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 5px 14px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.body {
+  padding: 32px 24px 28px;
+  text-align: center;
+}
+.label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #6e6e73;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.qr-wrap {
+  display: inline-block;
+  background: #fff8e1;
+  border: 2px solid #1d1d1f;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+.qr-wrap canvas, .qr-wrap img { display: block; }
+.btn-download {
+  display: block;
+  width: 100%;
+  background: #F5A800;
+  color: #000000;
+  font-size: 17px;
+  font-weight: 800;
+  padding: 16px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  margin-bottom: 12px;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-download:active { opacity: 0.82; }
+.hint {
+  font-size: 13px;
+  color: #6e6e73;
+  line-height: 1.5;
+}
+.footer {
+  padding: 14px 24px;
+  border-top: 1px solid #ececee;
+  text-align: center;
+  font-size: 12px;
+  color: #6e6e73;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="gold-stripe"></div>
+
+  <div class="header">
+    <img src="https://raw.githubusercontent.com/clydehoffer/csula-logo/main/LA%20Primary%20Logo%208-2024_V1%20Black%26Gold.png"
+         alt="Cal State LA" height="40" style="display:block;height:40px;width:auto;" />
+    <span class="header-badge">Car Show 2026</span>
+  </div>
+
+  <div class="body">
+    <div class="label">Your Check-In QR Code</div>
+    <div class="qr-wrap">
+      <div id="qr-target"></div>
+    </div>
+    <button class="btn-download" onclick="downloadQR()">↓ Download QR Code</button>
+    <p class="hint">Save this to your phone or print it out.<br>Present it to a volunteer at check-in on April 25.</p>
+  </div>
+
+  <div class="footer">Cal State LA Car Show 2026 &nbsp;·&nbsp; April 25 &nbsp;·&nbsp; Lot 5 &nbsp;·&nbsp; 10:00 AM – 5:00 PM</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+const p = new URLSearchParams(window.location.search);
+const checkinUrl = "https://clydehoffer.github.io/carshow-checkin/?" + window.location.search.slice(1);
+
+new QRCode(document.getElementById("qr-target"), {
+  text: checkinUrl,
+  width: 260,
+  height: 260,
+  colorDark: "#000000",
+  colorLight: "#ffffff",
+  correctLevel: QRCode.CorrectLevel.M,
+});
+
+function downloadQR() {
+  const canvas = document.querySelector("#qr-target canvas");
+  if (!canvas) return;
+  const first = p.get("first") || "";
+  const last  = p.get("last")  || "";
+  const plate = p.get("plate") || "";
+  const name  = [first, last, plate].filter(Boolean).join("_").replace(/\s+/g, "_").toLowerCase();
+  const a = document.createElement("a");
+  a.download = "qr_" + name + ".png";
+  a.href = canvas.toDataURL("image/png");
+  a.click();
+}
+</script>
+</body>
+</html>
