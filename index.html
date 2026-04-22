@@ -337,6 +337,8 @@ const E_S = {
   q3:      "entry.56029520",
   q3other: "entry.56029520.other_option_response",
 };
+const ZONE_MAP = {"MY95SVT":"Zone 1","STR480":"Zone 1","1NCW630":"Zone 1","6GON653":"Zone 1","GZH361":"Zone 1","415HZY":"Zone 1","8BLE582":"Zone 1","RGB297":"Zone 1","KPZ297":"Zone 1","Q78865":"Zone 1","JTY217":"Zone 1","XSF444":"Zone 1","2R33052":"Zone 1","BPG412":"Zone 1","RUN548":"Zone 1","066EKL":"Zone 1","GXB756":"Zone 1","W6HUT":"Zone 1","SANGABRIEL":"Zone 1","90063":"Zone 1","54RHD":"Zone 1","LAINDIA59":"Zone 1","51TRUCK":"Zone 1","K390C1":"Zone 1","WLDBUNY":"Zone 1","8GWS474":"Zone 1","913BLV":"Zone 1","HEG820":"Zone 1","64CHETA":"Zone 1","4XUE815":"Zone 2","RAWRWRX":"Zone 2","NCZ781":"Zone 2","8FXM893":"Zone 2","DLR8629":"Zone 2","JML510":"Zone 2","GRACE63":"Zone 2","THYM64":"Zone 2","WUC612":"Zone 2","RHD606":"Zone 2","E576WO":"Zone 2","CABADAS":"Zone 2","NWV338":"Zone 2","84RAMJR":"Zone 2","1957FUN":"Zone 2","9WGU738":"Zone 2","8XWM934":"Zone 2","1915GP1":"Zone 2","9CGD974":"Zone 2","8HJT445":"Zone 2","NRK777":"Zone 2","NRK177":"Zone 2","WRXDREW":"Zone 2","ZUBLURU":"Zone 2","8YMZ543":"Zone 2","8YTY230":"Zone 2","9GVM023":"Zone 2","9UOA256":"Zone 2","TOFUDAD":"Zone 3","TZUYUU":"Zone 3","AAAUUGH":"Zone 3","9POA908":"Zone 3","ESPADA3":"Zone 3","SXTFIV":"Zone 3","9ABT106":"Zone 3","71A39":"Zone 3","5A2885":"Zone 3","48TRUCK":"Zone 3","6PCT763":"Zone 3","IBCW373":"Zone 3","L326":"Zone 3","8H6276":"Zone 3","69413G4":"Zone 3","6M6992":"Zone 3","7VQA820":"Zone 3","26T2831":"Zone 3","5FXG998":"Zone 3","BTTRYMD":"Zone 3","O9D982":"Zone 3","8JEL166":"Zone 4","8ZNU707":"Zone 4","9TZG874":"Zone 4","SUJ709":"Zone 4","15369L3":"Zone 4","67RUBY":"Zone 4","BEASTCI":"Zone 4","BEUTY67":"Zone 4","STYLN64":"Zone 4","67ZOMBE":"Zone 4","KOOLRIV":"Zone 4","K392S1":"Zone 4","6AVA389":"Zone 4","UKE251":"Zone 4","8ZWV662":"Zone 4","5YTB088":"Zone 4","1DGW997":"Zone 4","J96862":"Zone 4","902VCZ":"Zone 4","91LPZ28":"Zone 4","P188V0":"Zone 4","7DZB215":"Zone 4","9JMF731":"Zone 4","OOM857":"Zone 4","32DELUX":"Zone 4","OLIBEAR":"Zone 4","6R":"Zone 5","8R":"Zone 5","FRSHX":"Zone 5","9JRH638":"Zone 1","6644563":"Zone 2","774839B4":"Zone 3","667483N5":"Zone 4","555634B4":"Zone 5"};
+
 const PIN          = "5151";
 const TESTING      = true;
 const CI_FORM      = "https://docs.google.com/forms/d/e/1FAIpQLSfsXzJkWG3GLe_D_Xo-9NBEmeHTfeLga-F16rOriCDaNcdfsQ/formResponse";
@@ -382,7 +384,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     year:    p.get("year")  || "",
     org:     p.get("org")   || "",
     email:   p.get("email") || "",
-    zone:    p.get("zone")  || "",
+    zone:    p.get("zone")  || ZONE_MAP[(p.get("plate")||"").toUpperCase().replace(/\s/g,"")] || "",
   };
 
   if (!TESTING) {
