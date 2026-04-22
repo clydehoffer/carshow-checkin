@@ -31,6 +31,86 @@ html, body {
   justify-content: center;
   padding: 24px 16px 48px;
 }
+
+/* ── Leaderboard ── */
+.leaderboard {
+  width: 100%;
+  max-width: 400px;
+  margin-top: 20px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255,206,0,0.2);
+}
+.lb-header {
+  background: #111;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid var(--gold);
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.lb-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.lb-toggle {
+  font-size: 11px;
+  color: #555;
+  font-weight: 500;
+}
+.lb-body { background: #0d0d0d; }
+.lb-body.hidden { display: none; }
+.lb-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 18px;
+  border-bottom: 1px solid #1a1a1a;
+}
+.lb-row:last-child { border-bottom: none; }
+.lb-rank {
+  font-size: 13px;
+  font-weight: 800;
+  color: #444;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.lb-rank.gold   { color: #FFD700; }
+.lb-rank.silver { color: #C0C0C0; }
+.lb-rank.bronze { color: #CD7F32; }
+.lb-info { flex: 1; min-width: 0; }
+.lb-name  { font-size: 13px; font-weight: 600; color: #eee; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lb-plate { font-size: 10px; color: #555; font-family: monospace; letter-spacing: 0.06em; margin-top: 1px; }
+.lb-votes {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+.lb-empty {
+  padding: 22px 18px;
+  text-align: center;
+  font-size: 12px;
+  color: #444;
+}
+.lb-refreshed {
+  padding: 7px 18px;
+  font-size: 10px;
+  color: #333;
+  text-align: right;
+  background: #0d0d0d;
+  border-top: 1px solid #1a1a1a;
+}
 .card {
   background: var(--white);
   border-radius: 24px;
@@ -323,6 +403,20 @@ html, body {
   </div>
 </div>
 
+<!-- ── Top 10 Leaderboard ── -->
+<div class="leaderboard">
+  <div class="lb-header" onclick="toggleLeaderboard()">
+    <div class="lb-title">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>
+      Top 10 — All Categories
+    </div>
+    <span class="lb-toggle" id="lb-toggle-label">Hide</span>
+  </div>
+  <div class="lb-body" id="lb-body">
+    <div class="lb-empty" id="lb-loading">Loading votes...</div>
+  </div>
+</div>
+
 <script>
 const SURVEY_FORM  = "https://docs.google.com/forms/d/e/1FAIpQLScBlw6xueq9UA479obU6EgxIl2CkyliHiVapUHIN_A2vyarMg/formResponse";
 const E_S = {
@@ -606,6 +700,66 @@ function showVoteBanner(catName) {
     <div class="hint" style="margin-top:12px">One vote per car per device. Thank you!</div>
   `;
 }
+
+// ── Leaderboard ──────────────────────────────────────────────────────────────
+let lbVisible = true;
+
+function toggleLeaderboard() {
+  lbVisible = !lbVisible;
+  document.getElementById("lb-body").classList.toggle("hidden", !lbVisible);
+  document.getElementById("lb-toggle-label").textContent = lbVisible ? "Hide" : "Show";
+}
+
+async function fetchLeaderboard() {
+  try {
+    const res  = await fetch(VOTES_API + "?action=votes&t=" + Date.now());
+    const data = await res.json();
+    const votes = data.votes || [];
+
+    // Aggregate total votes + capture latest name seen per plate
+    const tally = {};
+    for (const v of votes) {
+      const plate = (v.carId || "").toUpperCase();
+      if (!plate) continue;
+      if (!tally[plate]) tally[plate] = { votes: 0, name: v.driverName || v.name || "" };
+      tally[plate].votes++;
+      if (v.driverName || v.name) tally[plate].name = v.driverName || v.name;
+    }
+
+    const top10 = Object.entries(tally)
+      .sort((a, b) => b[1].votes - a[1].votes)
+      .slice(0, 10);
+
+    const body = document.getElementById("lb-body");
+    if (top10.length === 0) {
+      body.innerHTML = '<div class="lb-empty">No votes yet — check back soon!</div>';
+      return;
+    }
+
+    const rankClass = i => i === 0 ? "gold" : i === 1 ? "silver" : i === 2 ? "bronze" : "";
+    const rankLabel = i => i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}`;
+
+    const rows = top10.map(([plate, info], i) => `
+      <div class="lb-row">
+        <div class="lb-rank ${rankClass(i)}">${rankLabel(i)}</div>
+        <div class="lb-info">
+          <div class="lb-name">${info.name || "—"}</div>
+          <div class="lb-plate">${plate}</div>
+        </div>
+        <div class="lb-votes">${info.votes} vote${info.votes !== 1 ? "s" : ""}</div>
+      </div>
+    `).join("");
+
+    const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    body.innerHTML = rows + `<div class="lb-refreshed">Updated ${now} · refreshes every 30s</div>`;
+  } catch(e) {
+    document.getElementById("lb-body").innerHTML = '<div class="lb-empty">Could not load votes.</div>';
+  }
+}
+
+// Initial load + auto-refresh every 30 seconds
+fetchLeaderboard();
+setInterval(fetchLeaderboard, 30000);
 
 function postForm(url, fields, frameName) {
   let iframe = document.getElementById(frameName);
