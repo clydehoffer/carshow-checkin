@@ -176,17 +176,6 @@ html, body {
   <!-- Driver info (not checked in) -->
   <div class="screen" id="screen-driver">
     <div class="body-pad">
-      <!-- QR Code download section -->
-      <div style="text-align:center;margin-bottom:20px;">
-        <div class="section-label" style="margin-bottom:12px;">Your Check-In QR Code</div>
-        <div id="qr-canvas-wrap" style="display:inline-block;background:#fff;padding:12px;border-radius:12px;border:2px solid var(--gold);margin-bottom:12px;"></div>
-        <br>
-        <button class="btn btn-gold" id="qr-download-btn" onclick="downloadQR()" style="width:auto;padding:12px 28px;display:inline-block;margin-bottom:4px;">
-          ↓ Download QR Code
-        </button>
-        <div class="hint">Save this to your phone or print it for event day.</div>
-      </div>
-      <div class="divider"></div>
       <div class="section-label">Driver Information</div>
       <div class="driver-card">
         <div class="field-label">Name</div>
@@ -202,7 +191,7 @@ html, body {
         <div class="field-label">Email</div>
         <div class="field-value" id="d-email"></div>
       </div>
-      <button class="btn btn-black" onclick="goPin()">Volunteer Check-In →</button>
+      <button class="btn btn-gold" onclick="goPin()">Volunteer Check-In →</button>
       <div class="hint">Attendees: voting available after check-in.</div>
     </div>
   </div>
@@ -334,7 +323,6 @@ html, body {
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 const SURVEY_FORM  = "https://docs.google.com/forms/d/e/1FAIpQLScBlw6xueq9UA479obU6EgxIl2CkyliHiVapUHIN_A2vyarMg/formResponse";
 const E_S = {
@@ -422,29 +410,7 @@ function showDriverScreen() {
   if (driver.org) { document.getElementById("d-org").textContent = driver.org; }
   else            { document.getElementById("d-org-wrap").style.display = "none"; }
 
-  // Generate QR code from this page's URL (which IS the check-in link)
-  const wrap = document.getElementById("qr-canvas-wrap");
-  wrap.innerHTML = "";
-  new QRCode(wrap, {
-    text:   window.location.href,
-    width:  220,
-    height: 220,
-    colorDark:  "#000000",
-    colorLight: "#ffffff",
-    correctLevel: QRCode.CorrectLevel.M,
-  });
-
   show("screen-driver");
-}
-
-function downloadQR() {
-  const canvas = document.querySelector("#qr-canvas-wrap canvas");
-  if (!canvas) return;
-  const name = (driver.name || driver.plate || "qr_code").replace(/\s+/g, "_").toLowerCase();
-  const a = document.createElement("a");
-  a.download = "checkin_qr_" + name + ".png";
-  a.href = canvas.toDataURL("image/png");
-  a.click();
 }
 
 async function checkSheet() {
