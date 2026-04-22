@@ -416,8 +416,15 @@ function showDriverScreen() {
   document.getElementById("d-email").textContent   = driver.email   || "—";
   if (driver.org)  { document.getElementById("d-org").textContent  = driver.org; }
   else             { document.getElementById("d-org-wrap").style.display  = "none"; }
-  if (driver.zone) { document.getElementById("d-zone").textContent = driver.zone; }
-  else             { document.getElementById("d-zone-wrap").style.display = "none"; }
+  const zoneColors = {"Zone 1":"#D4A017","Zone 2":"#E91E8C","Zone 3":"#5BB8F5","Zone 4":"#4DD0C4","Zone 5":"#6BCB6B"};
+  if (driver.zone) {
+    const zc = zoneColors[driver.zone] || "#888";
+    document.getElementById("d-zone").innerHTML =
+      `<span style="display:inline-block;background:${zc};color:#000;font-weight:700;font-size:13px;padding:4px 12px;border-radius:999px;">${driver.zone}</span>`;
+    document.getElementById("d-zone").style.marginBottom = "10px";
+  } else {
+    document.getElementById("d-zone-wrap").style.display = "none";
+  }
 
   show("screen-driver");
 }
