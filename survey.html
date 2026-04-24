@@ -144,15 +144,6 @@ html, body {
 .raffle-hint {
   font-size: 11px; color: #555; margin-top: 10px; letter-spacing: 0.04em;
 }
-.copy-confirm {
-  text-align: center; font-size: 13px; color: var(--green);
-  min-height: 18px; margin-bottom: 10px; transition: opacity 0.3s;
-}
-.btn-outline {
-  background: var(--gray); color: var(--text);
-  border: 1px solid var(--border);
-}
-.btn-dark { background: var(--black); color: var(--white); }
 </style>
 </head>
 <body>
@@ -236,17 +227,15 @@ html, body {
         <div class="raffle-hint">April 25 · Lot 5</div>
       </div>
 
-      <div class="copy-confirm" id="copy-confirm"></div>
-      <button class="btn btn-gold" id="share-btn" onclick="shareRaffle()">Share My Number</button>
-      <button class="btn btn-outline" onclick="copyRaffle()" style="margin-bottom:14px;">Copy Number</button>
-      <button class="btn btn-dark" onclick="window.location.href='https://clydehoffer.github.io/carshow-vote/'">Vote Now →</button>
+      <button class="btn btn-gold" onclick="downloadTicket()">Save Ticket Image</button>
+      <p style="text-align:center;font-size:12px;color:var(--text3);margin-top:-4px;margin-bottom:18px;">Screenshot or save — show this to claim your prize!</p>
+      <canvas id="ticket-canvas" style="display:none;"></canvas>
     </div>
   </div>
 </div>
 
 <script>
 const SURVEY_FORM = "https://docs.google.com/forms/d/e/1FAIpQLScBlw6xueq9UA479obU6EgxIl2CkyliHiVapUHIN_A2vyarMg/formResponse";
-const CHECKIN_API = "https://script.google.com/macros/s/AKfycbwA3CW8pUTQety_3aGa1wfsMLNUjRCun4zKDuRf8ANxWMhvRTcjLWebk1A-4B8OcknRRQ/exec";
 const E_S = {
   q1:      "entry.896182722",
   q1other: "entry.896182722.other_option_response",
@@ -324,56 +313,111 @@ function submitSurvey() {
   localStorage.setItem("survey_done", "1");
   localStorage.setItem("raffle_number", raffle);
 
-  // Store raffle number via CHECKIN_API (fire and forget)
-  try {
-    var url = CHECKIN_API + "?action=raffle&raffle=" + encodeURIComponent(raffle) + "&ts=" + Date.now();
-    var img = new Image(); img.src = url; // no-cors, fire-and-forget
-  } catch(e) {}
-
   // Display raffle number and show raffle screen
   document.getElementById("raffle-number").textContent = raffle;
-
-  // Hide share button on non-supporting browsers
-  if (!navigator.share) {
-    document.getElementById("share-btn").style.display = "none";
-  }
-
   show("screen-raffle");
 }
 
-function shareRaffle() {
+function downloadTicket() {
   if (!currentRaffleNumber) return;
-  if (navigator.share) {
-    navigator.share({
-      title: "Cal State LA Car Show 2026 — My Raffle Number",
-      text: "My raffle ticket number is " + currentRaffleNumber + "! 🎟 Cal State LA Car Show 2026 — April 25, Lot 5."
-    }).catch(function() {});
-  }
-}
+  var W = 800, H = 420, R = 20, BRD = 4;
+  var canvas = document.getElementById("ticket-canvas");
+  canvas.width = W; canvas.height = H;
+  var ctx = canvas.getContext("2d");
 
-function copyRaffle() {
-  if (!currentRaffleNumber) return;
-  var el = document.getElementById("copy-confirm");
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(currentRaffleNumber).then(function() {
-      el.textContent = "✓ Copied to clipboard!";
-      setTimeout(function() { el.textContent = ""; }, 2500);
-    }).catch(function() { fallbackCopy(el); });
-  } else {
-    fallbackCopy(el);
-  }
-}
+  // Background
+  ctx.fillStyle = "#0a0a0a";
+  ctx.beginPath();
+  ctx.roundRect(0, 0, W, H, R);
+  ctx.fill();
 
-function fallbackCopy(el) {
-  var ta = document.createElement("textarea");
-  ta.value = currentRaffleNumber;
-  ta.style.cssText = "position:fixed;top:-999px;left:-999px;opacity:0;";
-  document.body.appendChild(ta);
-  ta.focus(); ta.select();
-  try { document.execCommand("copy"); el.textContent = "✓ Copied!"; }
-  catch(e) { el.textContent = "Couldn't copy — write it down!"; }
-  document.body.removeChild(ta);
-  setTimeout(function() { el.textContent = ""; }, 2500);
+  // Gold border
+  ctx.strokeStyle = "#FFCE00";
+  ctx.lineWidth = BRD;
+  ctx.beginPath();
+  ctx.roundRect(BRD/2, BRD/2, W - BRD, H - BRD, R);
+  ctx.stroke();
+
+  // Notch circles (left & right)
+  ctx.fillStyle = "#ffffff";
+  ctx.strokeStyle = "#FFCE00";
+  ctx.lineWidth = BRD;
+  [[-1, H/2], [W+1, H/2]].forEach(function(pos) {
+    ctx.beginPath();
+    ctx.arc(pos[0], pos[1], 18, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  });
+
+  // Gold top stripe
+  ctx.fillStyle = "#FFCE00";
+  ctx.fillRect(BRD, BRD, W - BRD*2, 8);
+
+  // Clip so nothing draws outside rounded rect
+  ctx.save();
+  ctx.beginPath();
+  ctx.roundRect(BRD/2, BRD/2, W - BRD, H - BRD, R);
+  ctx.clip();
+
+  // "RAFFLE TICKET" label
+  ctx.fillStyle = "#FFCE00";
+  ctx.font = "700 13px -apple-system, 'Helvetica Neue', Arial, sans-serif";
+  ctx.textAlign = "center";
+  ctx.letterSpacing = "0.2em";
+  ctx.fillText("🎟  RAFFLE TICKET", W/2, 70);
+
+  // Event name
+  ctx.fillStyle = "#666666";
+  ctx.font = "500 13px -apple-system, 'Helvetica Neue', Arial, sans-serif";
+  ctx.fillText("CAL STATE LA CAR SHOW 2026", W/2, 98);
+
+  // Divider line
+  ctx.strokeStyle = "rgba(255,206,0,0.25)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(80, 116); ctx.lineTo(W-80, 116);
+  ctx.stroke();
+
+  // Raffle number — big
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "800 86px -apple-system, 'Helvetica Neue', Arial, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText(currentRaffleNumber, W/2, 222);
+
+  // Divider line
+  ctx.strokeStyle = "rgba(255,206,0,0.25)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(80, 246); ctx.lineTo(W-80, 246);
+  ctx.stroke();
+
+  // Date / location
+  ctx.fillStyle = "#555555";
+  ctx.font = "500 13px -apple-system, 'Helvetica Neue', Arial, sans-serif";
+  ctx.fillText("APRIL 25  ·  LOT 5  ·  10:00 AM – 5:00 PM", W/2, 274);
+
+  // "Show this screen or screenshot to claim your prize"
+  ctx.fillStyle = "#444444";
+  ctx.font = "400 12px -apple-system, 'Helvetica Neue', Arial, sans-serif";
+  ctx.fillText("Present this ticket at the drawing to claim your prize.", W/2, 300);
+
+  // Bottom gold bar
+  ctx.fillStyle = "#FFCE00";
+  ctx.fillRect(BRD, H - BRD - 8, W - BRD*2, 8);
+
+  ctx.restore();
+
+  // Trigger download
+  canvas.toBlob(function(blob) {
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "carshow2026_raffle_" + currentRaffleNumber + ".png";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, "image/png");
 }
 
 function postForm(url, fields, frameName) {
