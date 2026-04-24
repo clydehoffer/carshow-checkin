@@ -73,6 +73,18 @@ html, body {
 }
 .btn:active { opacity: 0.8; }
 .btn-gold { background: var(--gold); color: var(--black); }
+.vote-countdown {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: #111; border: 1px solid rgba(255,206,0,0.3);
+  border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; text-align: center;
+}
+.vote-countdown .cd-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.08em; }
+.vote-countdown .cd-time  { font-size: 18px; font-weight: 800; color: var(--gold); letter-spacing: 0.06em; font-variant-numeric: tabular-nums; }
+.vote-countdown.urgent { border-color: rgba(229,57,53,0.5); }
+.vote-countdown.urgent .cd-time { color: #e53935; }
+.vote-closed-banner { background: #1a0000; border: 1px solid rgba(229,57,53,0.4); border-radius: 10px; padding: 14px 16px; text-align: center; margin-bottom: 14px; }
+.vote-closed-banner .vc-title { font-size: 15px; font-weight: 700; color: #e53935; margin-bottom: 4px; }
+.vote-closed-banner .vc-sub   { font-size: 13px; color: #888; }
 .btn-black { background: var(--black); color: var(--white); }
 .btn-outline { background: transparent; color: var(--text2); border: 1px solid var(--border); font-weight: 500; }
 .hint { font-size: 12px; color: var(--text3); text-align: center; line-height: 1.4; }
@@ -262,6 +274,12 @@ html, body {
         <div class="field-label">License Plate</div>
         <div class="field-value"><span class="plate-badge" id="v-plate"></span></div>
       </div>
+      <div id="vote-countdown" class="vote-countdown">
+        <div>
+          <div class="cd-label">Voting closes at 3:45 PM</div>
+          <div class="cd-time" id="cd-time">–:––:––</div>
+        </div>
+      </div>
       <div id="vote-area"></div>
     </div>
   </div>
@@ -362,6 +380,7 @@ const E_S = {
 };
 const ZONE_MAP = {"MY95SVT":"Zone 1","STR480":"Zone 1","1NCW630":"Zone 1","6GON653":"Zone 1","GZH361":"Zone 1","415HZY":"Zone 1","8BLE582":"Zone 1","RGB297":"Zone 1","KPZ297":"Zone 1","Q78865":"Zone 1","JTY217":"Zone 1","XSF444":"Zone 1","2R33052":"Zone 1","BPG412":"Zone 1","RUN548":"Zone 1","066EKL":"Zone 1","GXB756":"Zone 1","W6HUT":"Zone 1","SANGABRIEL":"Zone 1","90063":"Zone 1","54RHD":"Zone 1","LAINDIA59":"Zone 1","51TRUCK":"Zone 1","K390C1":"Zone 1","WLDBUNY":"Zone 1","8GWS474":"Zone 1","913BLV":"Zone 1","HEG820":"Zone 1","64CHETA":"Zone 1","4XUE815":"Zone 2","RAWRWRX":"Zone 2","NCZ781":"Zone 2","8FXM893":"Zone 2","DLR8629":"Zone 2","JML510":"Zone 2","GRACE63":"Zone 2","THYM64":"Zone 2","WUC612":"Zone 2","RHD606":"Zone 2","E576WO":"Zone 2","CABADAS":"Zone 2","NWV338":"Zone 2","84RAMJR":"Zone 2","1957FUN":"Zone 2","9WGU738":"Zone 2","8XWM934":"Zone 2","1915GP1":"Zone 2","9CGD974":"Zone 2","8HJT445":"Zone 2","NRK777":"Zone 2","NRK177":"Zone 2","WRXDREW":"Zone 2","ZUBLURU":"Zone 2","8YMZ543":"Zone 2","8YTY230":"Zone 2","9GVM023":"Zone 2","9UOA256":"Zone 2","TOFUDAD":"Zone 3","TZUYUU":"Zone 3","AAAUUGH":"Zone 3","9POA908":"Zone 3","ESPADA3":"Zone 3","SXTFIV":"Zone 3","9ABT106":"Zone 3","71A39":"Zone 3","5A2885":"Zone 3","48TRUCK":"Zone 3","6PCT763":"Zone 3","IBCW373":"Zone 3","L326":"Zone 3","8H6276":"Zone 3","69413G4":"Zone 3","6M6992":"Zone 3","7VQA820":"Zone 3","26T2831":"Zone 3","5FXG998":"Zone 3","BTTRYMD":"Zone 3","O9D982":"Zone 3","8JEL166":"Zone 4","8ZNU707":"Zone 4","9TZG874":"Zone 4","SUJ709":"Zone 4","15369L3":"Zone 4","67RUBY":"Zone 4","BEASTCI":"Zone 4","BEUTY67":"Zone 4","STYLN64":"Zone 4","67ZOMBE":"Zone 4","KOOLRIV":"Zone 4","K392S1":"Zone 4","6AVA389":"Zone 4","UKE251":"Zone 4","8ZWV662":"Zone 4","5YTB088":"Zone 4","1DGW997":"Zone 4","J96862":"Zone 4","902VCZ":"Zone 4","91LPZ28":"Zone 4","P188V0":"Zone 4","7DZB215":"Zone 4","9JMF731":"Zone 4","OOM857":"Zone 4","32DELUX":"Zone 4","OLIBEAR":"Zone 4","6R":"Zone 5","8R":"Zone 5","FRSHX":"Zone 5","9JRH638":"Zone 1","6644563":"Zone 2","774839B4":"Zone 3","667483N5":"Zone 4","555634B4":"Zone 5"};
 
+const VOTE_CUTOFF  = new Date('2026-04-25T22:45:00Z'); // 3:45 PM PDT
 const PIN          = "5151";
 const TESTING      = true;
 const CI_FORM      = "https://docs.google.com/forms/d/e/1FAIpQLSfsXzJkWG3GLe_D_Xo-9NBEmeHTfeLga-F16rOriCDaNcdfsQ/formResponse";
@@ -540,6 +559,7 @@ function showVote() {
 
   renderVoteArea();
   show("screen-vote");
+  startVoteCountdown();
 }
 
 function submitSurveyAndVote() {
@@ -574,6 +594,37 @@ function submitSurveyAndVote() {
 function proceedToVote() {
   renderVoteArea();
   show("screen-vote");
+  startVoteCountdown();
+}
+
+function startVoteCountdown() {
+  updateCountdown();
+  if (window._cdInterval) clearInterval(window._cdInterval);
+  window._cdInterval = setInterval(function() {
+    updateCountdown();
+  }, 1000);
+}
+
+function updateCountdown() {
+  var now  = new Date();
+  var diff = VOTE_CUTOFF - now;
+  var el   = document.getElementById("cd-time");
+  var box  = document.getElementById("vote-countdown");
+  if (!el) return;
+  if (diff <= 0) {
+    el.textContent = "Voting Closed";
+    if (box) { box.classList.add("urgent"); }
+    clearInterval(window._cdInterval);
+    // Re-render vote area to show closed state
+    renderVoteArea();
+    return;
+  }
+  var h = Math.floor(diff / 3600000);
+  var m = Math.floor((diff % 3600000) / 60000);
+  var s = Math.floor((diff % 60000) / 1000);
+  el.textContent = h + ":" + String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+  // Turn red in final 15 minutes
+  if (diff < 900000) { if (box) box.classList.add("urgent"); }
 }
 
 function downloadCITicket() {
@@ -618,6 +669,17 @@ function downloadCITicket() {
 }
 
 function renderVoteArea() {
+  // Enforce cutoff
+  if (new Date() >= VOTE_CUTOFF) {
+    document.getElementById("vote-area").innerHTML = `
+      <div class="vote-closed-banner">
+        <div class="vc-title">Voting is now closed</div>
+        <div class="vc-sub">Voting ended at 3:45 PM. Thank you for participating!</div>
+      </div>
+    `;
+    return;
+  }
+
   const alreadyVoted = votedPlates.includes(driver.plate.toUpperCase());
 
   if (alreadyVoted) {
