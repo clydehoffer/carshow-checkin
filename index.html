@@ -96,26 +96,6 @@ html, body {
 .icon-wrap svg { width: 26px; height: 26px; }
 .screen-title { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
 .screen-sub { font-size: 14px; color: var(--text2); line-height: 1.5; margin-bottom: 20px; }
-.pin-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
-.pin-sub { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
-.pin-dots { display: flex; gap: 12px; justify-content: center; margin-bottom: 6px; }
-.pin-dot { width: 13px; height: 13px; border-radius: 50%; background: var(--border); transition: background 0.15s; }
-.pin-dot.filled { background: var(--black); }
-.pin-dot.error { background: var(--red); }
-.pin-error { text-align: center; font-size: 12px; color: var(--red); font-weight: 500; min-height: 18px; margin-bottom: 14px; }
-.pin-keypad { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
-.pin-key { background: var(--gray); border: none; border-radius: var(--radius-sm); padding: 17px 0; font-size: 20px; color: var(--text); cursor: pointer; font-family: inherit; -webkit-tap-highlight-color: transparent; }
-.pin-key:active { background: var(--gray2); }
-.pin-key.empty { background: transparent; cursor: default; }
-.pin-key.del { font-size: 15px; color: var(--text2); }
-.success-icon { width: 68px; height: 68px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; animation: pop 0.4s cubic-bezier(0.34,1.56,0.64,1); }
-.success-icon svg { width: 34px; height: 34px; }
-.success-plate { display: inline-block; background: var(--black); color: var(--gold); font-size: 16px; font-weight: 700; letter-spacing: 0.1em; padding: 6px 16px; border-radius: 8px; font-family: monospace; margin: 10px 0 16px; }
-@keyframes pop { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
-@keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
-.shake { animation: shake 0.4s ease; }
-.spinner { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--black); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 14px; }
-@keyframes spin { to{transform:rotate(360deg)} }
 .vote-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
 .vote-sub { font-size: 13px; color: var(--text2); margin-bottom: 16px; line-height: 1.4; }
 .voted-item { display: flex; align-items: center; gap: 8px; padding: 9px 12px; background: rgba(29,185,84,0.08); border-radius: 8px; margin-bottom: 6px; font-size: 13px; font-weight: 500; color: var(--text); }
@@ -182,83 +162,6 @@ html, body {
       </div>
       <div class="screen-title" id="closed-title">Not open yet</div>
       <div class="screen-sub" id="closed-sub">Check-in opens April 25 at 10:00 AM.</div>
-    </div>
-  </div>
-
-  <!-- Driver info (not checked in) -->
-  <div class="screen" id="screen-driver">
-    <div class="body-pad">
-      <div class="section-label">Driver Information</div>
-      <div class="driver-card">
-        <div class="field-label">Name</div>
-        <div class="field-value" id="d-name"></div>
-        <div class="field-label">Vehicle</div>
-        <div class="field-value" id="d-vehicle"></div>
-        <div class="field-label">License Plate</div>
-        <div class="field-value"><span class="plate-badge" id="d-plate"></span></div>
-        <div id="d-org-wrap">
-          <div class="field-label">Car Club / Org</div>
-          <div class="field-value" id="d-org"></div>
-        </div>
-        <div id="d-zone-wrap">
-          <div class="field-label">Parking Zone</div>
-          <div class="field-value" id="d-zone"></div>
-        </div>
-        <div class="field-label">Email</div>
-        <div class="field-value" id="d-email"></div>
-      </div>
-      <button class="btn btn-gold" onclick="goPin()">Volunteer Check-In →</button>
-      <div class="hint">Attendees: voting available after check-in.</div>
-    </div>
-  </div>
-
-  <!-- PIN -->
-  <div class="screen" id="screen-pin">
-    <div class="body-pad">
-      <div class="pin-title">Volunteer PIN</div>
-      <div class="pin-sub">Enter the 4-digit PIN to check in this driver.</div>
-      <div class="pin-dots" id="pin-dots">
-        <div class="pin-dot" id="d0"></div>
-        <div class="pin-dot" id="d1"></div>
-        <div class="pin-dot" id="d2"></div>
-        <div class="pin-dot" id="d3"></div>
-      </div>
-      <div class="pin-error" id="pin-err"></div>
-      <div class="pin-keypad">
-        <button class="pin-key" onclick="pk('1')">1</button>
-        <button class="pin-key" onclick="pk('2')">2</button>
-        <button class="pin-key" onclick="pk('3')">3</button>
-        <button class="pin-key" onclick="pk('4')">4</button>
-        <button class="pin-key" onclick="pk('5')">5</button>
-        <button class="pin-key" onclick="pk('6')">6</button>
-        <button class="pin-key" onclick="pk('7')">7</button>
-        <button class="pin-key" onclick="pk('8')">8</button>
-        <button class="pin-key" onclick="pk('9')">9</button>
-        <button class="pin-key empty"></button>
-        <button class="pin-key" onclick="pk('0')">0</button>
-        <button class="pin-key del" onclick="pdel()">&#x232B;</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Submitting -->
-  <div class="screen" id="screen-submitting">
-    <div class="centered">
-      <div class="spinner"></div>
-      <div style="font-size:15px;font-weight:500;color:var(--text)">Checking in driver...</div>
-    </div>
-  </div>
-
-  <!-- Check-in success -->
-  <div class="screen" id="screen-ci-success">
-    <div class="centered">
-      <div class="success-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-      </div>
-      <div class="screen-title">Checked In!</div>
-      <div class="screen-sub">Driver is now live on the vote board.</div>
-      <div class="success-plate" id="ci-plate"></div>
-      <div style="font-size:13px;color:var(--text2);font-weight:500" id="ci-name"></div>
     </div>
   </div>
 
@@ -358,13 +261,8 @@ const E_S = {
 const ZONE_MAP = {"MY95SVT":"Zone 1","STR480":"Zone 1","1NCW630":"Zone 1","6GON653":"Zone 1","GZH361":"Zone 1","415HZY":"Zone 1","8BLE582":"Zone 1","RGB297":"Zone 1","KPZ297":"Zone 1","Q78865":"Zone 1","JTY217":"Zone 1","XSF444":"Zone 1","2R33052":"Zone 1","BPG412":"Zone 1","RUN548":"Zone 1","066EKL":"Zone 1","GXB756":"Zone 1","W6HUT":"Zone 1","SANGABRIEL":"Zone 1","90063":"Zone 1","54RHD":"Zone 1","LAINDIA59":"Zone 1","51TRUCK":"Zone 1","K390C1":"Zone 1","WLDBUNY":"Zone 1","8GWS474":"Zone 1","913BLV":"Zone 1","HEG820":"Zone 1","64CHETA":"Zone 1","4XUE815":"Zone 2","RAWRWRX":"Zone 2","NCZ781":"Zone 2","8FXM893":"Zone 2","DLR8629":"Zone 2","JML510":"Zone 2","GRACE63":"Zone 2","THYM64":"Zone 2","WUC612":"Zone 2","RHD606":"Zone 2","E576WO":"Zone 2","CABADAS":"Zone 2","NWV338":"Zone 2","84RAMJR":"Zone 2","1957FUN":"Zone 2","9WGU738":"Zone 2","8XWM934":"Zone 2","1915GP1":"Zone 2","9CGD974":"Zone 2","8HJT445":"Zone 2","NRK777":"Zone 2","NRK177":"Zone 2","WRXDREW":"Zone 2","ZUBLURU":"Zone 2","8YMZ543":"Zone 2","8YTY230":"Zone 2","9GVM023":"Zone 2","9UOA256":"Zone 2","TOFUDAD":"Zone 3","TZUYUU":"Zone 3","AAAUUGH":"Zone 3","9POA908":"Zone 3","ESPADA3":"Zone 3","SXTFIV":"Zone 3","9ABT106":"Zone 3","71A39":"Zone 3","5A2885":"Zone 3","48TRUCK":"Zone 3","6PCT763":"Zone 3","IBCW373":"Zone 3","L326":"Zone 3","8H6276":"Zone 3","69413G4":"Zone 3","6M6992":"Zone 3","7VQA820":"Zone 3","26T2831":"Zone 3","5FXG998":"Zone 3","BTTRYMD":"Zone 3","O9D982":"Zone 3","8JEL166":"Zone 4","8ZNU707":"Zone 4","9TZG874":"Zone 4","SUJ709":"Zone 4","15369L3":"Zone 4","67RUBY":"Zone 4","BEASTCI":"Zone 4","BEUTY67":"Zone 4","STYLN64":"Zone 4","67ZOMBE":"Zone 4","KOOLRIV":"Zone 4","K392S1":"Zone 4","6AVA389":"Zone 4","UKE251":"Zone 4","8ZWV662":"Zone 4","5YTB088":"Zone 4","1DGW997":"Zone 4","J96862":"Zone 4","902VCZ":"Zone 4","91LPZ28":"Zone 4","P188V0":"Zone 4","7DZB215":"Zone 4","9JMF731":"Zone 4","OOM857":"Zone 4","32DELUX":"Zone 4","OLIBEAR":"Zone 4","6R":"Zone 5","8R":"Zone 5","FRSHX":"Zone 5","9JRH638":"Zone 1","6644563":"Zone 2","774839B4":"Zone 3","667483N5":"Zone 4","555634B4":"Zone 5"};
 
 const VOTE_CUTOFF  = new Date('2026-04-25T22:45:00Z'); // 3:45 PM PDT
-const PIN          = "5151";
-const TESTING      = false;
-const CI_FORM      = "https://docs.google.com/forms/d/e/1FAIpQLSfsXzJkWG3GLe_D_Xo-9NBEmeHTfeLga-F16rOriCDaNcdfsQ/formResponse";
-const CHECKIN_API  = "https://script.google.com/macros/s/AKfycbwA3CW8pUTQety_3aGa1wfsMLNUjRCun4zKDuRf8ANxWMhvRTcjLWebk1A-4B8OcknRRQ/exec";
 const VOTES_API    = "https://script.google.com/macros/s/AKfycbyubbrgZS0i23l1zyL7lKn4O5KjBW8bnfRG2EpQrp97PYtAdG6LkkBDqaryD1HrAAlH/exec";
 const VOTE_FORM    = "https://docs.google.com/forms/d/e/1FAIpQLScCJ1GNmSBalsLmqU-ohr6L1IaAtmtKXbsNCluR3qHfQS0OhQ/formResponse";
-const E_CI  = { first:"entry.899096314", last:"entry.1158440844", email:"entry.2067804406", org:"entry.712451967", make:"entry.1848103390", model:"entry.984314671", plate:"entry.594175136" };
 const E_V   = { cat:"entry.2095184271", car:"entry.1446723408", name:"entry.1632049593", device:"entry.725102369" };
 const CATS  = [
   {id:"best-in-show",    name:"Best in Show"},
@@ -376,8 +274,6 @@ const CATS  = [
 const CHECK_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
 
 let driver = {};
-let pin    = "";
-let ciPlates = JSON.parse(localStorage.getItem("ci_v2")   || "[]");
 let votedPlates = JSON.parse(localStorage.getItem("voted_plates") || "[]");
 function getDeviceId() {
   let id = localStorage.getItem("device_id");
@@ -406,18 +302,12 @@ window.addEventListener("DOMContentLoaded", async () => {
     zone:    p.get("zone")  || ZONE_MAP[(p.get("plate")||"").toUpperCase().replace(/\s/g,"")] || "",
   };
 
-  if (!TESTING) {
-    const now   = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const event = new Date(2026, 3, 25);
-    const hr    = now.getHours();
-    if (today < event) return showClosed("Check-in not open yet", "Opens April 25 at 10:00 AM at Lot 5.");
-    if (today > event) return showClosed("Event has ended", "Thanks for participating!");
-    if (hr >= 17)      return showClosed("Check-in closed", "Check-in closed at 5:00 PM.");
-  }
+  const now   = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const event = new Date(2026, 3, 25);
+  if (today > event) return showClosed("Event has ended", "Thanks for participating!");
 
-  const checkedIn = ciPlates.includes(driver.plate.toUpperCase()) || await checkSheet();
-  checkedIn ? showVote() : showDriverScreen();
+  showVote();
 });
 
 function showClosed(t, s) {
@@ -426,83 +316,6 @@ function showClosed(t, s) {
   show("screen-closed");
 }
 
-function showDriverScreen() {
-  const v = driver.year ? driver.year.replace(".0","") + " " : "";
-  document.getElementById("d-name").textContent    = driver.name    || "—";
-  document.getElementById("d-plate").textContent   = driver.plate   || "—";
-  document.getElementById("d-vehicle").textContent = (v + driver.make + " " + driver.model).trim() || "—";
-  document.getElementById("d-email").textContent   = driver.email   || "—";
-  if (driver.org)  { document.getElementById("d-org").textContent  = driver.org; }
-  else             { document.getElementById("d-org-wrap").style.display  = "none"; }
-  const zoneColors = {"Zone 1":"#D4A017","Zone 2":"#E91E8C","Zone 3":"#5BB8F5","Zone 4":"#4DD0C4","Zone 5":"#6BCB6B"};
-  if (driver.zone) {
-    const zc = zoneColors[driver.zone] || "#888";
-    document.getElementById("d-zone").innerHTML =
-      `<span style="display:inline-block;background:${zc};color:#000;font-weight:700;font-size:13px;padding:4px 12px;border-radius:999px;">${driver.zone}</span>`;
-    document.getElementById("d-zone").style.marginBottom = "10px";
-  } else {
-    document.getElementById("d-zone-wrap").style.display = "none";
-  }
-
-  show("screen-driver");
-}
-
-async function checkSheet() {
-  try {
-    const res  = await fetch(CHECKIN_API + "?t=" + Date.now());
-    const data = await res.json();
-    return (data.plates || []).includes(driver.plate.toUpperCase());
-  } catch(e) { return false; }
-}
-
-// ── PIN ──
-function goPin() { show("screen-pin"); }
-function pk(d) {
-  if (pin.length >= 4) return;
-  pin += d; dots();
-  if (pin.length === 4) setTimeout(checkPin, 150);
-}
-function pdel() { pin = pin.slice(0,-1); document.getElementById("pin-err").textContent=""; dots(); }
-function dots(mode) {
-  for (let i=0;i<4;i++) {
-    const el = document.getElementById("d"+i);
-    el.classList.remove("filled","error");
-    if (mode==="error") el.classList.add("error");
-    else if (i<pin.length) el.classList.add("filled");
-  }
-}
-function checkPin() {
-  if (pin === PIN) { submitCI(); }
-  else {
-    pin = "";
-    dots("error");
-    document.getElementById("pin-err").textContent = "Incorrect PIN. Try again.";
-    document.getElementById("pin-dots").classList.add("shake");
-    setTimeout(() => { document.getElementById("pin-dots").classList.remove("shake"); dots(); }, 500);
-  }
-}
-
-// ── Check-in submit ──
-function submitCI() {
-  show("screen-submitting");
-  const parts = driver.name.split(" ");
-  postForm(CI_FORM, {
-    [E_CI.first]:  parts[0]||"",
-    [E_CI.last]:   parts.slice(1).join(" ")||"",
-    [E_CI.email]:  driver.email,
-    [E_CI.org]:    driver.org,
-    [E_CI.make]:   driver.make,
-    [E_CI.model]:  driver.model,
-    [E_CI.plate]:  driver.plate,
-  }, "ci-frame");
-  ciPlates.push(driver.plate.toUpperCase());
-  localStorage.setItem("ci_v2", JSON.stringify(ciPlates));
-  setTimeout(() => {
-    document.getElementById("ci-plate").textContent = driver.plate;
-    document.getElementById("ci-name").textContent  = driver.name;
-    show("screen-ci-success");
-  }, 1800);
-}
 
 // ── Vote screen ──
 function showVote() {
