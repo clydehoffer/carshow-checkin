@@ -413,7 +413,6 @@ window.addEventListener("DOMContentLoaded", async () => {
     const hr    = now.getHours();
     if (today < event) return showClosed("Check-in not open yet", "Opens April 25 at 10:00 AM at Lot 5.");
     if (today > event) return showClosed("Event has ended", "Thanks for participating!");
-    if (hr < 10)       return showClosed("Check-in not open yet", "Opens today at 10:00 AM.");
     if (hr >= 17)      return showClosed("Check-in closed", "Check-in closed at 5:00 PM.");
   }
 
